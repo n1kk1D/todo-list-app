@@ -2,7 +2,7 @@
     //Define the todo type
     type Todo = {
         id: number;
-        name: string;
+        text: string;
         isChecked: boolean;
     };
 
@@ -11,62 +11,51 @@
     //string for new todo input text 
     let newTodoText: string = '';
 
-    //fetch todoes from the backend
+    //fetch todos from the backend
     async function getTodos() {
         const todosData = await fetch("https://localhost:5000");
-
         const todos = await todosData.json(); 
         return todos;
     }
 
-    // function onGetTodoButtonClick() {
-    //     getTodos();
-    // }
+    //add get todo function for backend
     
     //add new todo
     function createTodos() {
-        if (newTodoText.trim() != '') {
-            const newTodo: Todo = {
-                id: Date.now(), //date is just basic storage
-                name: newTodoText,
-                isChecked: false
-            };
-            todos = [...todos, newTodo];
-            newTodoText = '';
-        }
+        const newTodo: Todo = {
+            //creates a new todo object with unique id, if todos array is not empty, new id one greater than last item's id, if todos array is empty = 1
+            id: todos.length > 0 ? todos[todos.length - 1].id + 1 : 1, 
+            text: newTodoText,
+            isChecked: false
+        };
+        todos = [...todos, newTodo];
+        newTodoText = '';
     }
 
-
-    function deleteTodo() {
-        function deleteTodo(id: number) {
-            todos = todos.filter(todo => todos.id !== id);
-        }
-    }
-
-    function markTodoAsDone(id: number) {
-        todos = todos.map(todo =>
-            todo.id === id ? {...todo, done: !todo.done } : todo
-        );
+    function deleteTodo(id: number) {
+        todos = todos.filter(todo => todo.id !== id);//filters todos array to exclue array based on its id
     }
 </script>
 
-{#each todos as todo}
-    <p>- {todo}</p>
-{/each}
 
-<h1>My To-do list</h1>
+<h1>To-do list</h1>
 <!-- Input for new todo -->
 <div> 
-    <input type="text" bind:value={newTodoText} placeholder="New todo">
-    <button on:click={createTodos}>Add Todo</button>
+    <input type="text" bind:value={newTodoText} placeholder="Description">
+    <button on:click={createTodos}>Add</button>
 </div>
 
 <!-- Display the todo list -->
- <!-- {each todos as todo(todo.id)}
- {
-    <button on:click={() => deleteTodo(todo.id)}>Delete</button>button>
-    <input type="checkbox" bind:checked={todo.isChecked}>
- } -->
-<div>
-<button on:click={createTodos}>add Todo</button>
-</div>
+ {#each todos as todo(todo.id)}
+    <div>
+        <input type="checkbox" bind:checked={todo.isChecked}>
+        <span class:checked={todo.isChecked}>{todo.text}</span>
+        <button on:click={() => deleteTodo(todo.id)}>Delete</button>
+    </div>
+ {/each}
+
+ <style>
+    .checked {
+        text-decoration: line-through;
+    }
+</style>
