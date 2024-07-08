@@ -33,10 +33,47 @@ app.post("/todo-item", (req: Request, res: Response) => {
 		.send(newTodoItem); // In REST APIs, it is customary for create-type requests (POST) to return the entire created item
 });
 
-// Get all the todos
-app.get("/todo-item", (req: Request, res: Response) => {
-	res.setHeader("Access-Control-Allow-Origin", "*").status(200).json(todos);
+
+// todo-item 
+
+
+// 
+app.get("/todo-item", (request: Request, response: Response) => {
+	response.status(200);
+	response.send(todos);
 });
+
+app.post("/todo-item", (req: Request, res: Response) => {
+	const todoRequest: CreateTodoItemRequest = req.body;
+
+	const newTodoItem: TodoItem = {
+		id: idCounter,
+		description: todoRequest.description,
+		isDone: false,
+	};
+
+	idCounter++;
+
+	todos.push(newTodoItem);
+
+	res
+		.status(200)
+		.send(newTodoItem); // In REST APIs, it is customary for create-type requests (POST) to return the entire created item
+});
+
+// REST //
+app.delete("/todo-item/{todoItemId}")
+
+app.get("/todo-item/")
+
+
+
+
+
+
+
+
+
 
 app.get("/", (req: Request, res: Response) => {
 	res

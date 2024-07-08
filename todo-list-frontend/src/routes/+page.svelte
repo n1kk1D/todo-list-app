@@ -13,23 +13,35 @@
 
     //fetch todos from the backend
     async function getTodos() {
-        const todosData = await fetch("https://localhost:5000");
-        const todos = await todosData.json(); 
-        return todos;
+        const getTodosHttpResponse = await fetch("https://localhost:5000/get-todos");
+        todos = await getTodosHttpResponse.json(); 
     }
 
     //add get todo function for backend
     
     //add new todo
-    function createTodos() {
-        const newTodo: Todo = {
-            //creates a new todo object with unique id, if todos array is not empty, new id one greater than last item's id, if todos array is empty = 1
-            id: todos.length > 0 ? todos[todos.length - 1].id + 1 : 1, 
-            text: newTodoText,
-            isChecked: false
-        };
-        todos = [...todos, newTodo];
-        newTodoText = '';
+    async function createTodos() {
+        const requestBody = {
+            description: newTodoText,
+        }
+
+        const createTodoHttpResponse = await fetch("https://localhost:5000/create-todo", {
+            method: "POST", // Make it a post request
+            body: JSON.stringify(requestBody) // Send in the body, as a JSON string
+        })
+
+        if (createTodoHttpResponse.status === 200) {
+            getTodos();
+        }
+
+        // const newTodo: Todo = {
+        //     //creates a new todo object with unique id, if todos array is not empty, new id one greater than last item's id, if todos array is empty = 1
+        //     id: todos.length > 0 ? todos[todos.length - 1].id + 1 : 1, 
+        //     text: newTodoText,
+        //     isChecked: false
+        // };
+        // todos = [...todos, newTodo];
+        // newTodoText = '';
     }
 
     function deleteTodo(id: number) {
