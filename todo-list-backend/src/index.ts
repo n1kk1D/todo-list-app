@@ -15,7 +15,7 @@ app.use(
 // State (count the number of requests)
 let idCounter = 0;
 
-let todos: TodoItem[] = [];
+const todos: Map<number, TodoItem> = new Map();
 
 // Add a todo item
 app.post("/todo-item", (req: Request, res: Response) => {
@@ -29,7 +29,7 @@ app.post("/todo-item", (req: Request, res: Response) => {
 
 	idCounter++;
 
-	todos.push(newTodoItem);
+	todos.set(newTodoItem.id, newTodoItem);
 
 	res.status(200).send(newTodoItem); // In REST APIs, it is customary for create-type requests (POST) to return the entire created item
 });
@@ -43,7 +43,8 @@ app.get("/todo-item", (req: Request, res: Response) => {
 app.post("/todo-item/:todoId/check", (req: Request, res: Response) => {
 	// Get the to-do item
 	const todoId = Number.parseInt(req.params.todoId);
-	const todo = todos.find((item) => item.id === todoId);
+
+	const todo = todos.get(todoId);
 
 	if (!todo) {
 		res.status(404).send(`Todo with ID '${todoId}' not found`);
@@ -59,7 +60,7 @@ app.post("/todo-item/:todoId/check", (req: Request, res: Response) => {
 app.post("/todo-item/:todoId/uncheck", (req: Request, res: Response) => {
 	// Get the to-do item
 	const todoId = Number.parseInt(req.params.todoId);
-	const todo = todos.find((item) => item.id === todoId);
+	const todo = todos.get(todoId);
 
 	if (!todo) {
 		res.status(404).send(`Todo with ID '${todoId}' not found`);
@@ -71,21 +72,47 @@ app.post("/todo-item/:todoId/uncheck", (req: Request, res: Response) => {
 	res.setHeader("Access-Control-Allow-Origin", "*").status(200).json(todo);
 });
 
+app.patch("/todo-item/:todoId", (req: Request, res: Response) => {
+	const todoId = Number.parseInt(req.params.todoId);
+
+	const newDescription = req.body.message;
+	if (!newDescription) {
+		res.status(404).send("'description' was not provided. Only 'description' can be updated via PATCH request")
+		return;
+	}
+	if (typeof (newDescription) !== "string") {
+		res.status(404).send("Type of 'description' must be a string")
+		return;
+	}
+
+	const todo = todos.get(todoId);
+
+	if (!todo) {
+		res.status(404).send(`Todo with ID '${todoId}' not found`);
+		return;
+	}
+
+	todo.description = newDescription;
+
+	res.status(200).send(todo);
+});
+
 // Delete a todo
 app.delete("/todo-item/:todoId", (req: Request, res: Response) => {
 	const todoId = Number.parseInt(req.params.todoId);
 
-	const initLength = todos.length;
-	todos = todos.filter((todo) => todo.id !== todoId);
+	const todo = todos.get(todoId);
 
-	if (todos.length === initLength) {
+	if (!todo) {
 		res.status(404).send(`Todo with ID '${todoId}' not found`);
-	} else {
-		res
-			.setHeader("Access-Control-Allow-Origin", "*")
-			.status(200)
-			.send("item deleted");
 	}
+
+	todos.delete(todoId);
+
+	res
+		.setHeader("Access-Control-Allow-Origin", "*")
+		.status(200)
+		.send(todo);
 });
 
 app.get("/", (req: Request, res: Response) => {
