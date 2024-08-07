@@ -59,7 +59,17 @@
         if (response.ok){
         todos = todos.filter(todo => todo.id !== id);//filters todos array to exclude array based on its id
         } else {
-            console.error('Failed to delte todo');
+            console.error('Failed to delete todo');
+        }
+    }
+
+    async function checkTodo(todo: TodoItem) {
+        const path = todo.isDone ? 'check' : 'uncheck';
+        const response = await fetch(`http://localhost:3000/todo-item/${todo.id}/${path}`, {
+            method: "POST"
+        });
+        if (!response.ok) {
+            console.error('Failed to update todo');
         }
     }
 
@@ -79,7 +89,7 @@
 <!-- Display the todo list -->
  {#each todos as todo(todo.id)}
     <div>
-        <input type="checkbox" bind:checked={todo.isDone}>
+        <input type="checkbox" bind:checked={todo.isDone} on:change={() => checkTodo(todo)}>
         <span class:checked={todo.isDone}>{todo.description}</span>
         <button on:click={() => deleteTodo(todo.id)}>Delete</button>
     </div>
