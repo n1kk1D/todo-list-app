@@ -36,7 +36,8 @@ app.post("/todo-item", (req: Request, res: Response) => {
 
 // Get all the todos
 app.get("/todo-item", (req: Request, res: Response) => {
-	res.status(200).json(todos);
+	const allTodos = Array.from(todos.values());
+	res.status(200).json(allTodos);
 });
 
 // Check a todo
